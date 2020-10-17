@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
 import io from 'socket.io-client';
+
 import './Feed.css';
+
 import more from '../assets/more.svg';
 import like from '../assets/like.svg';
 import comment from '../assets/comment.svg';
 import send from '../assets/send.svg';
-import api from '../services/api';
+import api from '../../services/api';
 
 class Feed extends Component{
     state = {
@@ -14,18 +16,26 @@ class Feed extends Component{
     
     async componentDidMount(){
         this.registerToSocket();
-        const response = await api.get('posts');
-        this.setState({  feed: response.data  });
 
+        const response = await api.get('posts');
+
+        this.setState({  feed: response.data  });
     }
 
     registerToSocket = () => {
         const socket = io('http://localhost:3333');
 
+        registerPost(socket);
+        registerLike(socket);
+    }
+
+    registerPost = (socket) => {
         socket.on('post', newPost => {
             this.setState({ feed: [newPost, ... this.state.feed] });
         })
+    }
 
+    registerLike = (socket) => {
         socket.on('like', likedPost => {
             this.setState({
                 feed: this.state.feed.map(post =>
@@ -53,7 +63,7 @@ class Feed extends Component{
                         <img src={more} alt="Mais" />
                     </header>
 
-                    <img src={`http://localhost:3333/files/${post.image}`} alt="" />
+                    <img src={`http://localhost:3333/files/${post.image}`} alt="Imagem" />
 
                     <footer>
                         <div className="actions">
@@ -61,8 +71,8 @@ class Feed extends Component{
                                 <img src={like} alt="" />    
                             </button>
                             
-                            <img src={comment} alt="" />
-                            <img src={send} alt="" />
+                            <img src={comment} alt="Comentar" />
+                            <img src={send} alt="Enviar" />
                         </div>
 
                         <strong>{post.likes} curtidas</strong>
